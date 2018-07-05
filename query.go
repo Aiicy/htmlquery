@@ -22,17 +22,17 @@ func CreateXPathNavigator(top *html.Node) *NodeNavigator {
 }
 
 // Find searches the html.Node that matches by the specified XPath expr.
-func Find(top *html.Node, expr string) []*html.Node {
+func Find(top *html.Node, expr string) ([]*html.Node, error) {
 	var elems []*html.Node
 	exp, err := xpath.Compile(expr)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	t := exp.Select(CreateXPathNavigator(top))
 	for t.MoveNext() {
 		elems = append(elems, (t.Current().(*NodeNavigator)).curr)
 	}
-	return elems
+	return elems, nil
 }
 
 // FindOne searches the html.Node that matches by the specified XPath expr,
