@@ -37,17 +37,17 @@ func Find(top *html.Node, expr string) ([]*html.Node, error) {
 
 // FindOne searches the html.Node that matches by the specified XPath expr,
 // and returns first element of matched html.Node.
-func FindOne(top *html.Node, expr string) *html.Node {
+func FindOne(top *html.Node, expr string) (*html.Node,error) {
 	var elem *html.Node
 	exp, err := xpath.Compile(expr)
 	if err != nil {
-		panic(err)
+		return nil,err
 	}
 	t := exp.Select(CreateXPathNavigator(top))
 	if t.MoveNext() {
 		elem = (t.Current().(*NodeNavigator)).curr
 	}
-	return elem
+	return elem,nil
 }
 
 // FindEach searches the html.Node and calls functions cb.
