@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/antchfx/xpath"
 	"golang.org/x/net/html"
@@ -37,17 +38,17 @@ func Find(top *html.Node, expr string) ([]*html.Node, error) {
 
 // FindOne searches the html.Node that matches by the specified XPath expr,
 // and returns first element of matched html.Node.
-func FindOne(top *html.Node, expr string) (*html.Node,error) {
+func FindOne(top *html.Node, expr string) (*html.Node, error) {
 	var elem *html.Node
 	exp, err := xpath.Compile(expr)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	t := exp.Select(CreateXPathNavigator(top))
 	if t.MoveNext() {
 		elem = (t.Current().(*NodeNavigator)).curr
 	}
-	return elem,nil
+	return elem, nil
 }
 
 // FindEach searches the html.Node and calls functions cb.
@@ -67,6 +68,28 @@ func FindEach(top *html.Node, expr string, cb func(int, *html.Node)) {
 // LoadURL loads the HTML document from the specified URL.
 func LoadURL(url string) (*html.Node, error) {
 	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	r, err := charset.NewReader(resp.Body, resp.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, err
+	}
+	return html.Parse(r)
+}
+
+// LoadURLWithProxy loads the HTML document from the specified URL with Proxy.
+func LoadURLWithProxy(link string, proxy string) (*html.Node, error) {
+	proxyUrl, err := url.Parse(proxy) //proxy = http://proxyIp:proxyPort
+	Client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		},
+	}
+
+	resp, err := Client.Get(link)
 	if err != nil {
 		return nil, err
 	}
