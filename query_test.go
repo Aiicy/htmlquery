@@ -37,7 +37,7 @@ const htmlSample = `<!DOCTYPE html><html lang="en-US">
 </html>
 `
 
-var testDoc = loadHTML(htmlSample)
+var testDoc, _ = loadHTML(htmlSample)
 
 func TestHttpLoad(t *testing.T) {
 	doc, err := LoadURL("http://www.bing.com")
@@ -103,7 +103,7 @@ func TestXPath(t *testing.T) {
 }
 
 func TestXPathCdUp(t *testing.T) {
-	doc := loadHTML(`<html><b attr="1"></b></html>`)
+	doc, _ := loadHTML(`<html><b attr="1"></b></html>`)
 	node, _ := FindOne(doc, "//b/@attr/..")
 	t.Logf("node = %#v", node)
 	if node == nil || node.Data != "b" {
@@ -111,10 +111,10 @@ func TestXPathCdUp(t *testing.T) {
 	}
 }
 
-func loadHTML(str string) *html.Node {
+func loadHTML(str string) (*html.Node, error) {
 	node, err := Parse(strings.NewReader(str))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return node
+	return node, nil
 }
