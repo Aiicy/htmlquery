@@ -50,15 +50,16 @@ func TestHttpLoad(t *testing.T) {
 }
 
 func TestNavigator(t *testing.T) {
-	top := FindOne(testDoc, "//html")
+	top, _ := FindOne(testDoc, "//html")
 	nav := &NodeNavigator{curr: top, root: top, attr: -1}
 	nav.MoveToChild() // HEAD
 	nav.MoveToNext()
 	if nav.NodeType() != xpath.TextNode {
-		t.Fatalf("expectd node type is TextNode,but got %s", nav.NodeType())
+		t.Fatalf("expectd node type is TextNode,but got %v ", nav.NodeType())
 	}
 	nav.MoveToNext() // <BODY>
-	if nav.Value() != InnerText(FindOne(testDoc, "//body")) {
+	bodyNode, _ := FindOne(testDoc, "//body")
+	if nav.Value() != InnerText(bodyNode) {
 		t.Fatal("body not equal")
 	}
 	nav.MoveToPrevious() //
@@ -79,7 +80,7 @@ func TestNavigator(t *testing.T) {
 }
 
 func TestXPath(t *testing.T) {
-	node := FindOne(testDoc, "//html")
+	node, _ := FindOne(testDoc, "//html")
 	if SelectAttr(node, "lang") != "en-US" {
 		t.Fatal("//html[@lang] != en-Us")
 	}
@@ -88,10 +89,11 @@ func TestXPath(t *testing.T) {
 	FindEach(testDoc, "//li", func(i int, node *html.Node) {
 		c++
 	})
-	if c != len(Find(testDoc, "//li")) {
+	length, _ := Find(testDoc, "//li")
+	if c != len(length) {
 		t.Fatal("li node count != 3")
 	}
-	node = FindOne(testDoc, "//header")
+	node, _ = FindOne(testDoc, "//header")
 	if strings.Index(InnerText(node), "Logo") > 0 {
 		t.Fatal("InnerText() have comment node text")
 	}
@@ -102,7 +104,7 @@ func TestXPath(t *testing.T) {
 
 func TestXPathCdUp(t *testing.T) {
 	doc := loadHTML(`<html><b attr="1"></b></html>`)
-	node := FindOne(doc, "//b/@attr/..")
+	node, _ := FindOne(doc, "//b/@attr/..")
 	t.Logf("node = %#v", node)
 	if node == nil || node.Data != "b" {
 		t.Fatal("//b/@id/.. != <b></b>")

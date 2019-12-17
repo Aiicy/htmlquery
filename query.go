@@ -52,10 +52,10 @@ func FindOne(top *html.Node, expr string) (*html.Node, error) {
 }
 
 // FindEach searches the html.Node and calls functions cb.
-func FindEach(top *html.Node, expr string, cb func(int, *html.Node)) {
+func FindEach(top *html.Node, expr string, cb func(int, *html.Node)) error {
 	exp, err := xpath.Compile(expr)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	t := exp.Select(CreateXPathNavigator(top))
 	i := 0
@@ -63,6 +63,7 @@ func FindEach(top *html.Node, expr string, cb func(int, *html.Node)) {
 		cb(i, (t.Current().(*NodeNavigator)).curr)
 		i++
 	}
+	return nil
 }
 
 // LoadURL loads the HTML document from the specified URL.
@@ -181,7 +182,9 @@ func (h *NodeNavigator) NodeType() xpath.NodeType {
 		// ignored <!DOCTYPE HTML> declare and as Root-Node type.
 		return xpath.RootNode
 	}
-	panic(fmt.Sprintf("unknown HTML node type: %v", h.curr.Type))
+	//因为必须要返回一个node,所以决定使用RootNode,但当error不为nil的时候表示有问题
+	tmp := fmt.Sprintf("unknown HTML node type: %v", h.curr.Type)
+	panic(tmp)
 }
 
 func (h *NodeNavigator) LocalName() string {
