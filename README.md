@@ -24,6 +24,22 @@ Getting Started
 doc, err := htmlquery.LoadURL("http://example.com/")
 ```
 
+### Load HTML document from URL with Header set
+
+```go
+header := map[string]string {
+	"User-Agent": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
+}
+doc,err := htmlquery.LoadURLWithHeader("http://example.com/",header)
+```
+
+### Load HTML document from URL with Proxy
+
+```go
+
+doc,err := htmlquery.LoadURLWithProxy("http://example.com/","http://proxyip:proxyport")
+```
+
 #### Load HTML document from string.
 
 ```go
