@@ -81,6 +81,30 @@ func LoadURL(url string) (*html.Node, error) {
 	return html.Parse(r)
 }
 
+//LoadURLWithHeader loads the HTML document from the specified URL with http header
+func LoadURLWithHeader(link string, headers map[string]string) (*html.Node, error) {
+	client := &http.Client{}
+	request, err := http.NewRequest("GET", link, nil)
+	for k, v := range headers {
+		request.Header.Set(k, v)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	r, err := charset.NewReader(resp.Body, resp.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, err
+	}
+	return html.Parse(r)
+}
+
 // LoadURLWithProxy loads the HTML document from the specified URL with Proxy.
 func LoadURLWithProxy(link string, proxy string) (*html.Node, error) {
 	proxyUrl, err := url.Parse(proxy) //proxy = http://proxyIp:proxyPort
