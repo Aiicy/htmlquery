@@ -5,6 +5,7 @@ package htmlquery
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -67,14 +68,22 @@ func FindEach(top *html.Node, expr string, cb func(int, *html.Node)) error {
 }
 
 // LoadURL loads the HTML document from the specified URL.
-func LoadURL(url string) (*html.Node, error) {
-	resp, err := http.Get(url)
+func LoadURL(ctx context.Context, url string) (*html.Node, error) {
+	Ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	r, err := charset.NewReader(resp.Body, resp.Header.Get("Content-Type"))
+	req = req.WithContext(Ctx)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	r, err := charset.NewReader(res.Body, res.Header.Get("Content-Type"))
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +91,9 @@ func LoadURL(url string) (*html.Node, error) {
 }
 
 //LoadURLWithHeader loads the HTML document from the specified URL with http header
-func LoadURLWithHeader(link string, headers map[string]string) (*html.Node, error) {
+func LoadURLWithHeader(ctx context.Context, link string, headers map[string]string) (*html.Node, error) {
+	Ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", link, nil)
 	for k, v := range headers {
@@ -92,6 +103,7 @@ func LoadURLWithHeader(link string, headers map[string]string) (*html.Node, erro
 		return nil, err
 	}
 
+	request = request.WithContext(Ctx)
 	resp, err := client.Do(request)
 	if err != nil {
 		return nil, err
@@ -106,7 +118,10 @@ func LoadURLWithHeader(link string, headers map[string]string) (*html.Node, erro
 }
 
 // LoadURLWithProxy loads the HTML document from the specified URL with Proxy.
-func LoadURLWithProxy(link string, proxy string) (*html.Node, error) {
+func LoadURLWithProxy(ctx context.Context, link string, proxy string) (*html.Node, error) {
+	Ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	proxyUrl, err := url.Parse(proxy) //proxy = http://proxyIp:proxyPort
 	Client := &http.Client{
 		Transport: &http.Transport{
@@ -114,13 +129,19 @@ func LoadURLWithProxy(link string, proxy string) (*html.Node, error) {
 		},
 	}
 
-	resp, err := Client.Get(link)
+	req, err := http.NewRequest(http.MethodGet, link, nil)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	r, err := charset.NewReader(resp.Body, resp.Header.Get("Content-Type"))
+	req = req.WithContext(Ctx)
+	res, err := Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	r, err := charset.NewReader(res.Body, res.Header.Get("Content-Type"))
 	if err != nil {
 		return nil, err
 	}

@@ -13,7 +13,7 @@ htmlquery is an XPath query package for HTML, lets you extract data or evaluate 
 Installation
 ====
 
-> $ go get github.com/antchfx/htmlquery
+> $ go get github.com/Aiicy/htmlquery
 
 Getting Started
 ====
@@ -21,23 +21,31 @@ Getting Started
 #### Load HTML document from URL.
 
 ```go
-doc, err := htmlquery.LoadURL("http://example.com/")
+ctx := context.Background()
+ctx, cancel := context.WithTimeout(ctx, time.Second)
+defer cancel()
+doc, err := htmlquery.LoadURL(ctx,"http://example.com/")
 ```
 
 ### Load HTML document from URL with Header set
 
 ```go
+ctx := context.Background()
+ctx, cancel := context.WithTimeout(ctx, time.Second)
+defer cancel()
 header := map[string]string {
 	"User-Agent": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
 }
-doc,err := htmlquery.LoadURLWithHeader("http://example.com/",header)
+doc,err := htmlquery.LoadURLWithHeader(ctx,"http://example.com/",header)
 ```
 
 ### Load HTML document from URL with Proxy
 
 ```go
-
-doc,err := htmlquery.LoadURLWithProxy("http://example.com/","http://proxyip:proxyport")
+ctx := context.Background()
+ctx, cancel := context.WithTimeout(ctx, time.Second)
+defer cancel()
+doc,err := htmlquery.LoadURLWithProxy(ctx,"http://example.com/","http://proxyip:proxyport")
 ```
 
 #### Load HTML document from string.
@@ -77,8 +85,19 @@ Quick Tutorial
 ===
 
 ```go
+package main
+import (
+	"fmt"
+	"context"
+
+	"github.com/Aiicy/htmlquery"
+)
+
 func main() {
-	doc, err := htmlquery.LoadURL("https://www.bing.com/search?q=golang")
+	ctx := context.Background()
+    ctx, cancel := context.WithTimeout(ctx, time.Second)
+    defer cancel()
+	doc, err := htmlquery.LoadURL(ctx,"https://www.bing.com/search?q=golang")
 	if err != nil {
 		panic(err)
 	}

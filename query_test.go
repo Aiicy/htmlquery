@@ -1,8 +1,10 @@
 package htmlquery
 
 import (
+	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/antchfx/xpath"
 	"golang.org/x/net/html"
@@ -40,7 +42,11 @@ const htmlSample = `<!DOCTYPE html><html lang="en-US">
 var testDoc, _ = loadHTML(htmlSample)
 
 func TestHttpLoad(t *testing.T) {
-	doc, err := LoadURL("http://www.bing.com")
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+
+	doc, err := LoadURL(ctx, "http://www.bing.com")
 	if err != nil {
 		t.Fatal(err)
 	}
